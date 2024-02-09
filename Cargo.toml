@@ -1,0 +1,24 @@
+[package]
+name = "ed25519"
+version = "0.1.0"
+edition = "2021"
+authors = ["Clément CHAPOT <clement.chapot@polytechnique.edu>"]
+description = "ed25519 implementation following RFC 8032 for INF568 course at École polytechnique"
+readme = "README.md"
+repository = "https://github.com/clemsys/INF568-ed25519"
+license = "MIT OR Apache-2.0"
+categories = ["algorithms", "cryptography", "command-line-utilities"]
+
+[dependencies]
+clap = { version = "4.4.16", features = ["cargo"] }
+rand = "0.8.5"
+rug = "1.23"
+sha2 = "0.10.8"
+
+[dev-dependencies]
+assert_cmd = "2.0.13"
+
+[profile.release]
+strip = true
+lto = true
+panic = "abort"
