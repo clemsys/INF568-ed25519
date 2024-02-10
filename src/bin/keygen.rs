@@ -25,7 +25,7 @@ fn main() {
 
     let prefix = matches.get_one::<String>("PREFIX").unwrap();
 
-    let (public, private) = generate_key_pair();
+    let (private, public) = generate_key_pair();
 
     for (filename, key) in [
         (format!("{prefix}.sk"), private),
