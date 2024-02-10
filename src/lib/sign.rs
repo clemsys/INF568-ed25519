@@ -1,5 +1,5 @@
 use super::arithmetic::{get_b, get_l};
-use super::ed25519_keygen::gen_public_scalar_prefix;
+use super::keygen::gen_public_scalar_prefix;
 use super::{Key, Signature};
 use rug::{integer::Order, Integer};
 use sha2::{Digest, Sha512};

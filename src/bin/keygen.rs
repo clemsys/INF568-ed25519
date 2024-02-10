@@ -1,5 +1,5 @@
 use clap::{arg, command, value_parser};
-use ed25519::lib::ed25519_keygen::generate_key_pair;
+use ed25519::lib::keygen::generate_key_pair;
 use ed25519::lib::Key;
 use std::fs;
 use std::io::Write;

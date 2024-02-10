@@ -1,4 +1,6 @@
 /target
-/ed25519-keygen
+/keygen
+/sign
+/verify
 *.sk
 *.pk

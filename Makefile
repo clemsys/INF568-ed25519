@@ -4,8 +4,8 @@ build:
 	cargo build --release
 
 copy:
-	cp target/release/ed25519_keygen ed25519-keygen
+	cp target/release/{keygen,sign,verify} .
 
 clean:
 	cargo clean
-	rm ed25519-keygen
+	rm {keygen,sign,verify}

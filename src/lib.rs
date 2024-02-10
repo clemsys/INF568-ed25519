@@ -3,7 +3,7 @@ pub mod lib {
     pub type Signature = [u8; 64];
 
     mod arithmetic;
-    pub mod ed25519_keygen;
-    pub mod ed25519_sign;
-    pub mod ed25519_verify;
+    pub mod keygen;
+    pub mod sign;
+    pub mod verify;
 }
