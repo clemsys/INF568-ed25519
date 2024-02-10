@@ -1,30 +1,39 @@
+use crate::lib::arithmetic::EdPoint;
 use rand::RngCore;
-use rug::Integer;
+use rug::{integer::Order, Integer};
 use sha2::{Digest, Sha512};
 
 pub type Key = [u8; 32];
 
 fn prune(key: &mut Key) {
     key[0] &= 0b1111_1000;
-    key[31] &= 0b0011_1111;
+    key[31] &= 0b0111_1111;
+    key[31] |= 0b0100_0000;
 }
 
 fn gen_public(private: Key) -> Key {
-    let mut public = Sha512::digest(private)[0..32].try_into().unwrap();
+    let s = {
+        // reverse the bytes of the private key
+        let mut hash: Key = Sha512::digest(private)[0..32].try_into().unwrap();
+        prune(&mut hash);
+        Integer::from_digits(&hash, Order::Lsf)
+    };
 
-    prune(&mut public);
-
-    let b = (
-        Integer::from_str_radix(
+    let b = {
+        let x = Integer::from_str_radix(
             "15112221349535400772501151409588531511454012693041857206046113283949847762202",
             10,
-        ),
-        Integer::from_str_radix(
+        )
+        .unwrap();
+        let y = Integer::from_str_radix(
             "46316835694926478169428394003475163141307993866256225615783033603165251855960",
             10,
-        ),
-    );
-    todo!()
+        )
+        .unwrap();
+        EdPoint::new(x, y)
+    };
+
+    (b * s).encode()
 }
 
 pub fn generate_key_pair() -> (Key, Key) {

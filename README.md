@@ -3,8 +3,6 @@
 Author: [Clément CHAPOT](mailto:clement.chapot@polytechnique.edu) <br>
 Description: implementation of ed25519 (see: [RFC 8032](https://datatracker.ietf.org/doc/html/rfc8032)) as part of INF568 course at École polytechnique
 
-This project is still a work in progress. The keygen is not yet functionnal.
-
 ## Building
 
 Build the project using `make`.
