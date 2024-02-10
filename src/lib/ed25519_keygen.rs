@@ -1,9 +1,8 @@
-use crate::lib::arithmetic::EdPoint;
+use super::arithmetic::get_b;
+use super::Key;
 use rand::RngCore;
 use rug::{integer::Order, Integer};
 use sha2::{Digest, Sha512};
-
-pub type Key = [u8; 32];
 
 fn prune(key: &mut Key) {
     key[0] &= 0b1111_1000;
@@ -11,29 +10,27 @@ fn prune(key: &mut Key) {
     key[31] |= 0b0100_0000;
 }
 
+// returns (public, s, hash[32..64])
+pub(crate) fn gen_public_scalar_prefix(private: Key) -> (Key, Integer, Key) {
+    let hash = Sha512::digest(private);
+
+    let upper_bytes = hash[32..64].try_into().unwrap();
+
+    let mut lower_bytes = hash[0..32].try_into().unwrap();
+    prune(&mut lower_bytes);
+    let scalar = Integer::from_digits(&lower_bytes, Order::Lsf);
+
+    let public = {
+        let b = get_b();
+        (b * scalar.clone()).encode()
+    };
+
+    (public, scalar, upper_bytes)
+}
+
 fn gen_public(private: Key) -> Key {
-    let s = {
-        // reverse the bytes of the private key
-        let mut hash: Key = Sha512::digest(private)[0..32].try_into().unwrap();
-        prune(&mut hash);
-        Integer::from_digits(&hash, Order::Lsf)
-    };
-
-    let b = {
-        let x = Integer::from_str_radix(
-            "15112221349535400772501151409588531511454012693041857206046113283949847762202",
-            10,
-        )
-        .unwrap();
-        let y = Integer::from_str_radix(
-            "46316835694926478169428394003475163141307993866256225615783033603165251855960",
-            10,
-        )
-        .unwrap();
-        EdPoint::new(x, y)
-    };
-
-    (b * s).encode()
+    let (public, _, _) = gen_public_scalar_prefix(private);
+    public
 }
 
 pub fn generate_key_pair() -> (Key, Key) {
@@ -50,18 +47,55 @@ pub fn generate_key_pair() -> (Key, Key) {
 mod test {
     use super::*;
 
+    fn key_from_str(s: &str) -> Key {
+        s.chars()
+            .collect::<Vec<char>>()
+            .chunks(2)
+            .map(|chunk| chunk.iter().collect::<String>())
+            .map(|byte| u8::from_str_radix(&byte, 16).unwrap())
+            .collect::<Vec<u8>>()
+            .try_into()
+            .unwrap()
+    }
+
+    fn correct_gen_public(private: &str, expected_public: &str) {
+        let private = key_from_str(private);
+        let expected_public = key_from_str(expected_public);
+        assert_eq!(gen_public(private), expected_public);
+    }
+
     #[test]
     fn correct_gen_public_1() {
-        let private: Key = [
-            0x9d, 0x61, 0xb1, 0x9d, 0xef, 0xfd, 0x5a, 0x60, 0xba, 0x84, 0x4a, 0xf4, 0x92, 0xec,
-            0x2c, 0xc4, 0x44, 0x49, 0xc5, 0x69, 0x7b, 0x32, 0x69, 0x19, 0x70, 0x3b, 0xac, 0x03,
-            0x1c, 0xae, 0x7f, 0x60,
-        ];
-        let expected_public: Key = [
-            0xd7, 0x5a, 0x98, 0x01, 0x82, 0xb1, 0x0a, 0xb7, 0xd5, 0x4b, 0xfe, 0xd3, 0xc9, 0x64,
-            0x07, 0x3a, 0x0e, 0xe1, 0x72, 0xf3, 0xda, 0xa6, 0x23, 0x25, 0xaf, 0x02, 0x1a, 0x68,
-            0xf7, 0x07, 0x51, 0x1a,
-        ];
-        assert_eq!(gen_public(private), expected_public);
+        let private = "9d61b19deffd5a60ba844af492ec2cc44449c5697b326919703bac031cae7f60";
+        let expected_public = "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a";
+        correct_gen_public(private, expected_public);
+    }
+
+    #[test]
+    fn correct_gen_public_2() {
+        let private = "4ccd089b28ff96da9db6c346ec114e0f5b8a319f35aba624da8cf6ed4fb8a6fb";
+        let expected_public = "3d4017c3e843895a92b70aa74d1b7ebc9c982ccf2ec4968cc0cd55f12af4660c";
+        correct_gen_public(private, expected_public);
+    }
+
+    #[test]
+    fn correct_gen_public_3() {
+        let private = "c5aa8df43f9f837bedb7442f31dcb7b166d38535076f094b85ce3a2e0b4458f7";
+        let expected_public = "fc51cd8e6218a1a38da47ed00230f0580816ed13ba3303ac5deb911548908025";
+        correct_gen_public(private, expected_public);
+    }
+
+    #[test]
+    fn correct_gen_public_1024() {
+        let private = "f5e5767cf153319517630f226876b86c8160cc583bc013744c6bf255f5cc0ee5";
+        let expected_public = "278117fc144c72340f67d0f2316e8386ceffbf2b2428c9c51fef7c597f1d426e";
+        correct_gen_public(private, expected_public);
+    }
+
+    #[test]
+    fn correct_gen_public_sha() {
+        let private = "833fe62409237b9d62ec77587520911e9a759cec1d19755b7da901b96dca3d42";
+        let expected_public = "ec172b93ad5e563bf4932c70e1245034c35467ef2efd4d64ebf819683467e2bf";
+        correct_gen_public(private, expected_public);
     }
 }

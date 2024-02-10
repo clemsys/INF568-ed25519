@@ -1,4 +1,4 @@
-use super::ed25519_keygen::Key;
+use super::Key;
 use rug::{integer::Order, ops::Pow, Integer};
 
 fn get_p() -> Integer {
@@ -11,6 +11,25 @@ fn get_d() -> Integer {
         10,
     )
     .unwrap()
+}
+
+pub fn get_l() -> Integer {
+    Integer::from(2).pow(252)
+        + Integer::from_str_radix("27742317777372353535851937790883648493", 10).unwrap()
+}
+
+pub fn get_b() -> EdPoint {
+    let x = Integer::from_str_radix(
+        "15112221349535400772501151409588531511454012693041857206046113283949847762202",
+        10,
+    )
+    .unwrap();
+    let y = Integer::from_str_radix(
+        "46316835694926478169428394003475163141307993866256225615783033603165251855960",
+        10,
+    )
+    .unwrap();
+    EdPoint::new(x, y)
 }
 
 #[derive(Clone)]
@@ -60,8 +79,12 @@ impl EdPoint {
 
     pub fn encode(&mut self) -> Key {
         self.normalize();
-        let mut digits: Key = self.y.to_digits(Order::Lsf).try_into().unwrap();
-        digits[31] |= (self.x.get_bit(0) as u8) << 7;
+        let mut digits: Key = {
+            let mut digits = self.y.to_digits(Order::Lsf);
+            digits.resize(32, 0);
+            digits.try_into().unwrap()
+        };
+        digits[31] |= (u8::from(self.x.get_bit(0))) << 7;
         digits
     }
 }
@@ -94,7 +117,7 @@ impl std::ops::Mul<Integer> for EdPoint {
 
     // self is P, other is s, output is Q
     fn mul(mut self, mut s: Integer) -> Self {
-        let mut q = EdPoint {
+        let mut q = Self {
             x: Integer::from(0),
             y: Integer::from(1),
             z: Integer::from(1),
