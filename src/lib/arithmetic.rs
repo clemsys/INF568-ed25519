@@ -32,7 +32,7 @@ pub fn get_b() -> EdPoint {
     EdPoint::new(x, y)
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct EdPoint {
     x: Integer,
     y: Integer,
@@ -86,6 +86,61 @@ impl EdPoint {
         };
         digits[31] |= (u8::from(self.x.get_bit(0))) << 7;
         digits
+    }
+
+    fn recover_x(y: Integer, sign: bool) -> Result<Integer, ()> {
+        let p = get_p();
+        if y >= p {
+            Err(())
+        } else {
+            let d: Integer = get_d();
+            let two = Integer::from(2);
+
+            let y2: Integer = y.secure_pow_mod(&two, &p);
+            let u: Integer = (y2.clone() - Integer::ONE).modulo(&p);
+            let v: Integer = (d * y2 + Integer::ONE).modulo(&p);
+
+            let mut x = {
+                let a = (u.clone() * v.clone().secure_pow_mod(&Integer::from(3), &p)).modulo(&p);
+                let b = (u.clone() * v.clone().secure_pow_mod(&Integer::from(7), &p))
+                    .secure_pow_mod(&((p.clone() - 5) / 8), &p);
+                (a * b).modulo(&p)
+            };
+
+            let vx2 = (v * x.clone().secure_pow_mod(&two, &p)).modulo(&p);
+
+            if vx2.is_congruent(&u, &p) {
+            } else if vx2.is_congruent(&(-u), &p) {
+                x = (x * Integer::from(2).secure_pow_mod(&((p.clone() - 1) / 4), &p)).modulo(&p);
+            } else {
+                return Err(());
+            };
+
+            if x == Integer::ZERO && sign {
+                Err(())
+            } else {
+                if !(x.is_congruent_u(u32::from(sign), 2)) {
+                    x = -x + &p;
+                }
+                Ok(x)
+            }
+        }
+    }
+
+    pub fn decode(digits: Key) -> Result<Self, ()> {
+        let mut y = Integer::from_digits(&digits, Order::Lsf);
+        let sign = y.get_bit(255);
+        y.set_bit(255, false);
+
+        match Self::recover_x(y.clone(), sign) {
+            Ok(x) => Ok(Self {
+                x: x.clone(),
+                y: y.clone(),
+                z: Integer::from(1),
+                t: (x * &y).modulo(&get_p()),
+            }),
+            Err(()) => Err(()),
+        }
     }
 }
 
