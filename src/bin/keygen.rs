@@ -17,7 +17,7 @@ fn write_key(filename: &str, key: Key) -> Result<(), std::io::Error> {
 fn main() {
     let matches = command!()
         .arg(
-            arg!([PREFIX] "prefix used in the key files filenames")
+            arg!([PREFIX] "prefix used in the keyfiles filenames")
                 .required(true)
                 .value_parser(value_parser!(String)),
         )

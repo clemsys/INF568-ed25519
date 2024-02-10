@@ -4,7 +4,7 @@ use super::{Key, Signature};
 use rug::{integer::Order, Integer};
 use sha2::{Digest, Sha512};
 
-fn sign(private: Key, message: &[u8]) -> Signature {
+pub fn sign(private: Key, message: &[u8]) -> Signature {
     let l = get_l();
     let b = get_b();
 
