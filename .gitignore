@@ -2,5 +2,5 @@
 /keygen
 /sign
 /verify
-*.sk
-*.pk
+/*.sk
+/*.pk
