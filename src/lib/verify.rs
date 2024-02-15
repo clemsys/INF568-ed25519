@@ -18,8 +18,6 @@ pub fn verify(public: Key, message: &[u8], signature: Signature) -> bool {
     let Ok(a) = EdPoint::decode(public) else {
         return false;
     };
-    let tata = a.clone().encode();
-    assert_eq!(tata, public);
 
     let k = {
         let mut bytes = signature[0..32].to_vec();

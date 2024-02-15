@@ -38,17 +38,6 @@ fn main() {
             std::process::exit(1)
         });
 
-    let public: Key = fs::read(format!("{prefix}.pk"))
-        .unwrap_or_else(|_| {
-            eprintln!("Failed reading {prefix}.pk");
-            std::process::exit(1)
-        })
-        .try_into()
-        .unwrap_or_else(|_| {
-            eprintln!("Invalid key in {prefix}.pk");
-            std::process::exit(1)
-        });
-
     let message = fs::read(datafile).unwrap_or_else(|_| {
         eprintln!("Failed reading {datafile}");
         std::process::exit(1)

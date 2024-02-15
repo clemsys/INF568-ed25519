@@ -1,6 +1,6 @@
 # INF568 Assignment 5 - ed25519
 
-Author: [Clément CHAPOT](mailto:clement.chapot@polytechnique.edu) <br>
+Author: [Clément CHAPOT](mailto:clement.chapot@polytechnique.edu)<br>
 Description: implementation of ed25519 (see: [RFC 8032](https://datatracker.ietf.org/doc/html/rfc8032)) as part of INF568 course at École polytechnique
 
 ## Building
