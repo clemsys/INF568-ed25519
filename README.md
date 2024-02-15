@@ -25,4 +25,14 @@ For more precise usage information, use `--help` on the relevant binary.
 
 The core of the project can be found in `src/lib/`.
 
+Edwards and Montgomery arithmetic are implemented in `src/lib/arithmetic/`. Each file corresponds to a specific type of point (`ProjEdPoint`, `ProjMPoint`, `MPoint`, `XLineProjMPoint`), with relevant operations and conversions to the other types.
+
 Files in `src/bin/` are only here to produce the binaries, so they mostly contain a main function, which calls functions from `src/lib/` directly.
+
+## Extensions
+
+The implementation from the main branch is not completely compliant with the RFC because some extensions have been implemented. For a fully compliant version, use the branch `rfc-compliant`.
+
+### Constant time scalar multiplication
+
+Constant time scalar multiplication is achieved by converting Edwards coordinates to Montgomery coordinates to use the (constant-time) Montgomery-Ladder for scalar multiplication. The Montgomery-Ladder outputs an x-line point, so y has to be recovered thanks to the _Okeya–Sakurai y-coordinate recovery algorithm_, before the Montgomery point can be converted back to Edwards coordinates.

@@ -1,4 +1,4 @@
-use super::arithmetic::{get_b, get_l};
+use super::arithmetic::proj_edwards::{get_b, get_l};
 use super::keygen::gen_public_scalar_prefix;
 use super::{Key, Signature};
 use rug::{integer::Order, Integer};
@@ -18,7 +18,7 @@ pub fn sign(private: Key, message: &[u8]) -> Signature {
     }
     .modulo(&l);
 
-    let r_encoding = (b * r.clone()).encode();
+    let r_encoding = (b * &r).encode();
 
     let k = {
         let mut bytes = r_encoding.to_vec();

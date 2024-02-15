@@ -1,10 +1,10 @@
-use super::arithmetic::{get_b, get_l, EdPoint};
+use super::arithmetic::proj_edwards::{get_b, get_l, ProjEdPoint};
 use super::{Key, Signature};
 use rug::{integer::Order, Integer};
 use sha2::{Digest, Sha512};
 
 pub fn verify(public: Key, message: &[u8], signature: Signature) -> bool {
-    let Ok(r) = EdPoint::decode(signature[0..32].try_into().unwrap()) else {
+    let Ok(r) = ProjEdPoint::decode(signature[0..32].try_into().unwrap()) else {
         return false;
     };
     let s = {
@@ -15,7 +15,7 @@ pub fn verify(public: Key, message: &[u8], signature: Signature) -> bool {
         }
         s
     };
-    let Ok(a) = EdPoint::decode(public) else {
+    let Ok(a) = ProjEdPoint::decode(public) else {
         return false;
     };
 
@@ -26,7 +26,7 @@ pub fn verify(public: Key, message: &[u8], signature: Signature) -> bool {
         Integer::from_digits(Sha512::digest(&bytes).as_slice(), Order::Lsf)
     };
 
-    get_b() * s == r + &(a * k)
+    get_b() * &s == r + &(a * &k)
 }
 
 #[cfg(test)]

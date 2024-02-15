@@ -1,4 +1,4 @@
-use super::arithmetic::get_b;
+use super::arithmetic::proj_edwards::get_b;
 use super::Key;
 use rand::RngCore;
 use rug::{integer::Order, Integer};
@@ -22,7 +22,7 @@ pub(crate) fn gen_public_scalar_prefix(private: Key) -> (Key, Integer, Key) {
 
     let public = {
         let b = get_b();
-        (b * scalar.clone()).encode()
+        (b * &scalar).encode()
     };
 
     (public, scalar, upper_bytes)
