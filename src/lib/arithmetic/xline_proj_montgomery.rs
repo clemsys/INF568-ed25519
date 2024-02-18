@@ -46,11 +46,11 @@ impl From<ProjEdPoint> for XLineProjMPoint {
 }
 
 impl XLineProjMPoint {
-    pub fn x(&self) -> &Integer {
+    pub const fn x(&self) -> &Integer {
         &self.x
     }
 
-    pub fn z(&self) -> &Integer {
+    pub const fn z(&self) -> &Integer {
         &self.z
     }
 
@@ -133,16 +133,16 @@ fn y_recovery(
 ) -> ProjMPoint {
     let two = Integer::from(2);
     let mut v1 = (point.x().clone() * x_q.z()).modulo(p);
-    let mut v2 = (x_q.x.clone() + &v1).modulo(&p);
-    let v3 = ((x_q.x.clone() - &v1).secure_pow_mod(&two, &p) * x_plus.x()).modulo(&p);
-    v1 = (Integer::from(2) * a * x_q.z()).modulo(&p);
-    v2 = ((v2 + &v1) * (point.x().clone() * x_q.x() + x_q.z()).modulo(&p)).modulo(&p);
-    v1 = (v1 * x_q.z()).modulo(&p);
-    v2 = ((v2 - &v1) * x_plus.z()).modulo(&p);
-    let y = (v2 - &v3).modulo(&p);
+    let mut v2 = (x_q.x.clone() + &v1).modulo(p);
+    let v3 = ((x_q.x.clone() - &v1).secure_pow_mod(&two, p) * x_plus.x()).modulo(p);
+    v1 = (Integer::from(2) * a * x_q.z()).modulo(p);
+    v2 = ((v2 + &v1) * (point.x().clone() * x_q.x() + x_q.z()).modulo(p)).modulo(p);
+    v1 = (v1 * x_q.z()).modulo(p);
+    v2 = ((v2 - &v1) * x_plus.z()).modulo(p);
+    let y = (v2 - &v3).modulo(p);
     v1 = Integer::from(2) * b * point.y() * x_q.z() * x_plus.z();
-    let x = (v1.clone() * x_q.x()).modulo(&p);
-    let z = (v1 * x_q.z()).modulo(&p);
+    let x = (v1.clone() * x_q.x()).modulo(p);
+    let z = (v1 * x_q.z()).modulo(p);
     ProjMPoint::new(x, y, z)
 }
 

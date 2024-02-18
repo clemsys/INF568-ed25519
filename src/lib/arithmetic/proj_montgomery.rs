@@ -13,15 +13,15 @@ impl ProjMPoint {
         Self { x, y, z }
     }
 
-    pub fn x(&self) -> &Integer {
+    pub const fn x(&self) -> &Integer {
         &self.x
     }
 
-    pub fn y(&self) -> &Integer {
+    pub const fn y(&self) -> &Integer {
         &self.y
     }
 
-    pub fn z(&self) -> &Integer {
+    pub const fn z(&self) -> &Integer {
         &self.z
     }
 }

@@ -48,15 +48,15 @@ impl ProjEdPoint {
         }
     }
 
-    pub fn x(&self) -> &Integer {
+    pub const fn x(&self) -> &Integer {
         &self.x
     }
 
-    pub fn y(&self) -> &Integer {
+    pub const fn y(&self) -> &Integer {
         &self.y
     }
 
-    pub fn z(&self) -> &Integer {
+    pub const fn z(&self) -> &Integer {
         &self.z
     }
 
@@ -186,10 +186,16 @@ impl std::ops::Mul<&Integer> for ProjEdPoint {
 
     // self is P, other is s, output is Q
     fn mul(self, s: &Integer) -> Self {
-        let proj_m_point = scalar_mul(&Self::p(), &Self::a(), &Self::b(), s, &MPoint::from(&self));
-        let mut proj_ed_point = ProjEdPoint::from(&proj_m_point);
+        let proj_m_point = scalar_mul(
+            &Self::p(),
+            &Self::a(),
+            &Self::b(),
+            s,
+            &MPoint::try_from(&self).unwrap(),
+        );
+        let mut proj_ed_point = Self::from(&proj_m_point);
         proj_ed_point.normalize();
-        ProjEdPoint::from(&proj_m_point)
+        Self::from(&proj_m_point)
     }
 }
 
@@ -210,7 +216,7 @@ impl From<&ProjMPoint> for ProjEdPoint {
         let y = ((point.x().clone() - point.z()) * point.y()).modulo(&p);
         let z = ((point.x().clone() + point.z()) * point.y()).modulo(&p);
         let t = (((point.x().clone() - point.z()) * point.x()).modulo(&p) * &root).modulo(&p);
-        ProjEdPoint { x, y, z, t }
+        Self { x, y, z, t }
     }
 }
 
@@ -223,7 +229,7 @@ impl From<&MPoint> for ProjEdPoint {
         let y = ((point.x().clone() - Integer::from(1)) * point.y()).modulo(&p);
         let z = ((point.x().clone() + Integer::from(1)) * point.y()).modulo(&p);
         let t = ((point.x().clone() - Integer::from(1)) * point.x() * &root).modulo(&p);
-        ProjEdPoint { x, y, z, t }
+        Self { x, y, z, t }
     }
 }
 
@@ -234,7 +240,7 @@ mod test {
     #[test]
     fn correct_from_mpoint() {
         let b = get_b();
-        assert_eq!(ProjEdPoint::from(&MPoint::from(&b)), b);
+        assert_eq!(ProjEdPoint::from(&MPoint::try_from(&b).unwrap()), b);
     }
 
     #[test]
@@ -246,13 +252,19 @@ mod test {
     #[test]
     fn correct_from_cycle() {
         let b = get_b();
-        assert_eq!(ProjEdPoint::from(&ProjMPoint::from(&MPoint::from(&b))), b);
+        assert_eq!(
+            ProjEdPoint::from(&ProjMPoint::from(&MPoint::try_from(&b).unwrap())),
+            b
+        );
     }
 
     #[test]
     fn correct_from_reverse_cycle() {
         let b = get_b();
-        assert_eq!(ProjEdPoint::from(&MPoint::from(&ProjMPoint::from(&b))), b);
+        assert_eq!(
+            ProjEdPoint::from(&MPoint::try_from(&ProjMPoint::from(&b)).unwrap()),
+            b
+        );
     }
 
     fn equivalent_mul(s: Integer) {

@@ -53,8 +53,9 @@ fn main() {
             std::process::exit(1)
         });
 
-    match verify(public, &message, signature) {
-        true => println!("ACCEPT"),
-        false => println!("REJECT"),
+    if verify(public, &message, signature) {
+        println!("ACCEPT");
+    } else {
+        println!("REJECT");
     }
 }
